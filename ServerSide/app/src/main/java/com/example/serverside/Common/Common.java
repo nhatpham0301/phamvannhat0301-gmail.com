@@ -7,8 +7,11 @@ import android.graphics.Paint;
 
 import com.example.serverside.Model.Request;
 import com.example.serverside.Model.User;
+import com.example.serverside.Remote.APIService;
 import com.example.serverside.Remote.IGeoCoordinates;
 import com.example.serverside.Remote.RetrofitClient;
+
+import java.util.ArrayList;
 
 public class Common {
     public static User currentUser;
@@ -20,6 +23,12 @@ public class Common {
     public static final String baseUrl = "https://maps.googleapis.com";
 
     public static final int PICK_IMAGE_REQUEST = 71;
+
+    private static final String BASE_URL = "https://fcm.googleapis.com/";
+
+    public static APIService getFCMService(){
+        return RetrofitClient.getClient(BASE_URL).create(APIService.class);
+    }
 
     public static String convertCodeToStatus(String code) {
         if(code.equals("0"))
@@ -49,4 +58,5 @@ public class Common {
 
         return scaleBitmap2;
     }
+
 }

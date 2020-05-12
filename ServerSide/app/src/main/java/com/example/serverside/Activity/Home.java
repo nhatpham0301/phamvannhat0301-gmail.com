@@ -10,8 +10,8 @@ import com.bumptech.glide.Glide;
 import com.example.serverside.Common.Common;
 import com.example.serverside.Interface.ItemClickListener;
 import com.example.serverside.Model.Category;
+import com.example.serverside.Model.Token;
 import com.example.serverside.R;
-import com.example.serverside.Service.ListenOrder;
 import com.example.serverside.ViewHolder.MenuViewHolder;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
@@ -20,6 +20,7 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -36,6 +37,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
@@ -86,17 +88,28 @@ public class Home extends AppCompatActivity implements NavigationView.OnNavigati
 
         addControl();
 
-        setSupportActionBar(toolbar);
-        //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setHomeButtonEnabled(true);
         toolbar.setTitle("Menu Management");
+        toolbar.setNavigationIcon(R.drawable.ic_menu_black_24dp);
+        setSupportActionBar(toolbar);
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                drawer.openDrawer(Gravity.LEFT);
+            }
+        });
 
 
         loadMenu();
         addEvent();
 
-        Intent service = new Intent(Home.this, ListenOrder.class);
-        startService(service);
+        updateToken(FirebaseInstanceId.getInstance().getToken());
+    }
+
+    private void updateToken(String token) {
+        FirebaseDatabase db = FirebaseDatabase.getInstance();
+        DatabaseReference reference = db.getReference("Tokens");
+        Token data = new Token(token, true);
+        reference.child(Common.currentUser.getPhone()).setValue(data);
     }
 
     private void loadMenu() {

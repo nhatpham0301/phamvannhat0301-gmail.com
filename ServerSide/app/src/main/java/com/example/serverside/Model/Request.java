@@ -3,27 +3,23 @@ package com.example.serverside.Model;
 import java.util.List;
 
 public class Request {
-    private String Phone, Name, Address, Total, status;
+    private String Phone, Name, Address, Total, Status, Comment;
+    private Double Latitude,Longitude;
     private List<Order> Foods;
 
     public Request() {
     }
 
-    public Request(String phone, String name, String address, String total, List<Order> foods) {
+    public Request(String phone, String name, String address, String total, String status, String comment, Double latitude, Double longitude, List<Order> foods) {
         Phone = phone;
         Name = name;
         Address = address;
         Total = total;
-        this.status = "0"; // 0: placed, 1: shipping, 2: shipped
+        Status = status;
+        Comment = comment;
+        Latitude = latitude;
+        Longitude = longitude;
         Foods = foods;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
     }
 
     public String getPhone() {
@@ -56,6 +52,38 @@ public class Request {
 
     public void setTotal(String total) {
         Total = total;
+    }
+
+    public String getStatus() {
+        return Status;
+    }
+
+    public void setStatus(String status) {
+        Status = status;
+    }
+
+    public String getComment() {
+        return Comment;
+    }
+
+    public void setComment(String comment) {
+        Comment = comment;
+    }
+
+    public Double getLatitude() {
+        return Latitude;
+    }
+
+    public void setLatitude(Double latitude) {
+        Latitude = latitude;
+    }
+
+    public Double getLongitude() {
+        return Longitude;
+    }
+
+    public void setLongitude(Double longitude) {
+        Longitude = longitude;
     }
 
     public List<Order> getFoods() {

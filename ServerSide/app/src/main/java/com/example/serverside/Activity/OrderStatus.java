@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -17,16 +18,28 @@ import android.widget.Toast;
 
 import com.example.serverside.Common.Common;
 import com.example.serverside.Interface.ItemClickListener;
+import com.example.serverside.Model.MyResponse;
+import com.example.serverside.Model.Notification;
 import com.example.serverside.Model.Request;
+import com.example.serverside.Model.Sender;
+import com.example.serverside.Model.Token;
 import com.example.serverside.R;
+import com.example.serverside.Remote.APIService;
 import com.example.serverside.TrackingOrder;
 import com.example.serverside.ViewHolder.OrderViewHolder;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.jaredrummler.materialspinner.MaterialSpinner;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class OrderStatus extends AppCompatActivity {
 
@@ -37,6 +50,8 @@ public class OrderStatus extends AppCompatActivity {
     DatabaseReference reference;
 
     MaterialSpinner materialSpinner;
+
+    APIService mService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,16 +70,40 @@ public class OrderStatus extends AppCompatActivity {
 
         adapter = new FirebaseRecyclerAdapter<Request, OrderViewHolder>(options) {
             @Override
-            protected void onBindViewHolder(@NonNull OrderViewHolder orderViewHolder, int i, @NonNull final Request request) {
+            protected void onBindViewHolder(@NonNull OrderViewHolder orderViewHolder,final int i, @NonNull final Request request) {
 
                 orderViewHolder.txtAddress.setText(request.getAddress());
                 orderViewHolder.txtId.setText(adapter.getRef(i).getKey());
                 orderViewHolder.txtPhone.setText(request.getPhone());
                 orderViewHolder.txtStatus.setText(Common.convertCodeToStatus(request.getStatus()));
 
-                orderViewHolder.setItemClickListener(new ItemClickListener() {
+                orderViewHolder.btnEdit.setOnClickListener(new View.OnClickListener() {
                     @Override
-                    public void OnClick(View view, int position, boolean isLongClick) {
+                    public void onClick(View v) {
+                        showUpdateDialog(adapter.getRef(i).getKey(), adapter.getItem(i));
+                    }
+                });
+
+                orderViewHolder.btnRemove.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        deleteOrder(adapter.getRef(i).getKey());
+                    }
+                });
+
+                orderViewHolder.btnDetail.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent intent = new Intent(OrderStatus.this, OrderDetail.class);
+                        Common.currentRequest = request;
+                        intent.putExtra("OrderId", adapter.getRef(i).getKey());
+                        startActivity(intent);
+                    }
+                });
+
+                orderViewHolder.btnDirection.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
                         Intent intent = new Intent(OrderStatus.this, TrackingOrder.class);
                         Common.currentRequest = request;
                         startActivity(intent);
@@ -87,6 +126,7 @@ public class OrderStatus extends AppCompatActivity {
     }
 
     private void addControl() {
+        mService = Common.getFCMService();
         recyclerView = findViewById(R.id.recycler_orderStatus);
         recyclerView.setHasFixedSize(true);
         layoutManager = new LinearLayoutManager(this);
@@ -95,18 +135,9 @@ public class OrderStatus extends AppCompatActivity {
         reference = FirebaseDatabase.getInstance().getReference("Requests");
     }
 
-    @Override
-    public boolean onContextItemSelected(@NonNull MenuItem item) {
-
-        if(item.getTitle().equals(Common.UPDATE)){
-            showUpdateDialog(adapter.getRef(item.getOrder()).getKey(), adapter.getItem(item.getOrder()));
-        } else if(item.getTitle().equals(Common.DELETE))
-            deleteOrder(adapter.getRef(item.getOrder()).getKey());
-        return super.onContextItemSelected(item);
-    }
-
     private void deleteOrder(String key) {
         reference.child(key).removeValue();
+        adapter.notifyDataSetChanged();
         Toast.makeText(this, "Deleted !!!", Toast.LENGTH_SHORT).show();
     }
 
@@ -132,6 +163,9 @@ public class OrderStatus extends AppCompatActivity {
 
                 item.setStatus(String.valueOf(materialSpinner.getSelectedIndex()));
                 reference.child(localKey).setValue(item);
+                adapter.notifyDataSetChanged();
+
+                sendOrderStatusToUser(localKey,item);
                 Toast.makeText(OrderStatus.this, "Updated!!!", Toast.LENGTH_SHORT).show();
             }
         });
@@ -144,5 +178,42 @@ public class OrderStatus extends AppCompatActivity {
         });
 
         alertDialog.show();
+    }
+
+    private void sendOrderStatusToUser(final String localKey,final Request item) {
+        DatabaseReference tokens =  FirebaseDatabase.getInstance().getReference("Tokens");
+        tokens.orderByKey().equalTo(item.getPhone())
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        for(DataSnapshot ds: dataSnapshot.getChildren()){
+                            Token token = ds.getValue(Token.class);
+
+                            Notification notification = new Notification("Order Food", "YourOrder" + localKey + "was update");
+                            Sender content = new Sender(token.getToken(),notification);
+                            mService.sendNotification(content)
+                                    .enqueue(new Callback<MyResponse>() {
+                                        @Override
+                                        public void onResponse(Call<MyResponse> call, Response<MyResponse> response) {
+                                            if(response.body().success == 1){
+                                                Toast.makeText(OrderStatus.this, "Order was updated", Toast.LENGTH_SHORT).show();
+                                            } else {
+                                                Toast.makeText(OrderStatus.this, "Order was updated!!! But failed to send notification", Toast.LENGTH_SHORT).show();
+                                            }
+                                        }
+
+                                        @Override
+                                        public void onFailure(Call<MyResponse> call, Throwable t) {
+                                            Log.e("ERROR",t.getMessage());
+                                        }
+                                    });
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
     }
 }

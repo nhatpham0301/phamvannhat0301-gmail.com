@@ -26,8 +26,8 @@ import com.bumptech.glide.Glide;
 import com.example.orderfood.Common.Common;
 import com.example.orderfood.Interface.ItemClickListener;
 import com.example.orderfood.Model.Category;
+import com.example.orderfood.Model.Token;
 import com.example.orderfood.R;
-import com.example.orderfood.Service.ListenOrder;
 import com.example.orderfood.ViewHolder.MenuViewHolder;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
@@ -35,6 +35,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.iid.FirebaseInstanceId;
 
 import io.paperdb.Paper;
 
@@ -79,12 +80,17 @@ public class Home extends AppCompatActivity implements
             Toast.makeText(Home.this, "Please Check your connection !!!", Toast.LENGTH_SHORT).show();
             return;
         }
+
+        updateToken(FirebaseInstanceId.getInstance().getToken());
         addEvent();
 
-        // Register service
-        Intent service = new Intent(Home.this, ListenOrder.class);
-        startService(service);
+    }
 
+    private void updateToken(String token) {
+        FirebaseDatabase db = FirebaseDatabase.getInstance();
+        DatabaseReference reference = db.getReference("Tokens");
+        Token data = new Token(token, false);
+        reference.child(Common.currentUser.getPhone()).setValue(data);
     }
 
     private void loadMenu() {

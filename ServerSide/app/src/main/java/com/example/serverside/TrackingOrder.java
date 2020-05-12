@@ -66,6 +66,7 @@ public class TrackingOrder extends FragmentActivity implements OnMapReadyCallbac
     private static int DISPLACEMENT = 10;
 
     private IGeoCoordinates mService;
+    private Double yourLatitude, yourLongitude, orderLatitude, orderLongitude;
 
 
     @Override
@@ -107,10 +108,10 @@ public class TrackingOrder extends FragmentActivity implements OnMapReadyCallbac
         } else {
             mLastlocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
             if (mLastlocation != null) {
-                double latitude = mLastlocation.getLatitude();
-                double longitude = mLastlocation.getLongitude();
+                yourLatitude = mLastlocation.getLatitude();
+                yourLongitude = mLastlocation.getLongitude();
 
-                LatLng yourLocation = new LatLng(latitude, longitude);
+                LatLng yourLocation = new LatLng(yourLatitude, yourLongitude);
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(yourLocation, 17));
                 mMap.addMarker(new MarkerOptions()
                         .title("Your Location")
@@ -119,8 +120,10 @@ public class TrackingOrder extends FragmentActivity implements OnMapReadyCallbac
 //                mMap.addMarker(new MarkerOptions().position(yourLocation).title("Your Location"));
 //                mMap.moveCamera(CameraUpdateFactory.newLatLng(yourLocation));
 //                mMap.animateCamera(CameraUpdateFactory.zoomTo(17.0f));
-
-                drawRoute(yourLocation, Common.currentRequest.getAddress());
+                orderLatitude = Common.currentRequest.getLatitude();
+                orderLongitude = Common.currentRequest.getLongitude();
+                LatLng orderLocation = new LatLng(orderLatitude, orderLongitude);
+                drawRoute(yourLocation, orderLocation);
 
             } else {
                 //Toast.makeText(this, "Couldn't get the location", Toast.LENGTH_SHORT).show();
@@ -128,59 +131,31 @@ public class TrackingOrder extends FragmentActivity implements OnMapReadyCallbac
         }
     }
 
-    private void drawRoute(final LatLng yourLocation, String address) {
-        mService.getGeoCode(address).enqueue(new Callback<String>() {
-            @Override
-            public void onResponse(Call<String> call, Response<String> response) {
-                try {
-                    JSONObject jsonObject = new JSONObject(response.body().toString());
-                    String lat = ((JSONArray) jsonObject.get("results"))
-                            .getJSONObject(0)
-                            .getJSONObject("geometry")
-                            .getJSONObject("location")
-                            .get("lat").toString();
+    private void drawRoute(final LatLng yourLocation, LatLng orderLocation) {
 
-                    String lng = ((JSONArray) jsonObject.get("results"))
-                            .getJSONObject(0)
-                            .getJSONObject("geometry")
-                            .getJSONObject("location")
-                            .get("lng").toString();
+        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.order);
+        bitmap = Common.scaleBitmap(bitmap, 150, 150);
 
-                    LatLng orderLocation = new LatLng(Double.parseDouble(lat), Double.parseDouble(lng));
+        MarkerOptions marker = new MarkerOptions().icon(BitmapDescriptorFactory.fromBitmap(bitmap))
+                .title("Order of " + Common.currentRequest.getPhone())
+                .position(orderLocation);
 
-                    Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.order);
-                    bitmap = Common.scaleBitmap(bitmap, 70, 70);
+        mMap.addMarker(marker);
 
-                    MarkerOptions marker = new MarkerOptions().icon(BitmapDescriptorFactory.fromBitmap(bitmap))
-                            .title("Order of " + Common.currentRequest.getPhone())
-                            .position(orderLocation);
-
-                    mMap.addMarker(marker);
-
-                    mService.getDirections(yourLocation.latitude + "," + yourLocation.longitude,
-                            orderLocation.latitude + "," + orderLocation.longitude)
-                            .enqueue(new Callback<String>() {
-                                @Override
-                                public void onResponse(Call<String> call, Response<String> response) {
-                                    new ParserTask().execute(response.body().toString());
-                                }
-
-                                @Override
-                                public void onFailure(Call<String> call, Throwable t) {
-
-                                }
-                            });
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-
-            @Override
-            public void onFailure(Call<String> call, Throwable t) {
-
-            }
-        });
+        //drawRoute
+//        mService.getDirections(yourLocation.latitude + "," + yourLocation.longitude,
+//                orderLocation.latitude + "," + orderLocation.longitude)
+//                .enqueue(new Callback<String>() {
+//                    @Override
+//                    public void onResponse(Call<String> call, Response<String> response) {
+//                        new ParserTask().execute(response.body().toString());
+//                    }
+//
+//                    @Override
+//                    public void onFailure(Call<String> call, Throwable t) {
+//
+//                    }
+//                });
     }
 
     private void requestRuntimePermission() {
@@ -326,14 +301,14 @@ public class TrackingOrder extends FragmentActivity implements OnMapReadyCallbac
                 lineOptions = new PolylineOptions();
                 List<HashMap<String, String>> path = lists.get(i);
 
-                for (int j = 0; j < path.size(); j++){
-                   HashMap<String,String> point = path.get(j);
+                for (int j = 0; j < path.size(); j++) {
+                    HashMap<String, String> point = path.get(j);
 
-                   double lat = Double.parseDouble(point.get("lat"));
-                   double lng = Double.parseDouble(point.get("lng"));
-                   LatLng position = new LatLng(lat,lng);
+                    double lat = Double.parseDouble(point.get("lat"));
+                    double lng = Double.parseDouble(point.get("lng"));
+                    LatLng position = new LatLng(lat, lng);
 
-                   points.add(position);
+                    points.add(position);
                 }
 
                 lineOptions.addAll(points);

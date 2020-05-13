@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -36,6 +37,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.jaredrummler.materialspinner.MaterialSpinner;
+
+import java.util.Locale;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -104,8 +107,11 @@ public class OrderStatus extends AppCompatActivity {
                 orderViewHolder.btnDirection.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        Intent intent = new Intent(OrderStatus.this, TrackingOrder.class);
-                        Common.currentRequest = request;
+//                        Intent intent = new Intent(OrderStatus.this, TrackingOrder.class);
+//                        Common.currentRequest = request;
+//                        startActivity(intent);
+                        String uri = String.format(Locale.ENGLISH, "geo:%f,%f?z=17&q=%f,%f", request.getLatitude(),request.getLongitude(),request.getLatitude(),request.getLongitude());
+                        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
                         startActivity(intent);
                     }
                 });

@@ -2,50 +2,86 @@
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="200dp"
+    android:layout_height="250dp"
     android:layout_marginBottom="8dp"
-    app:cardElevation="4dp">
+    app:cardCornerRadius="0dp"
+    app:cardElevation="10dp">
 
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_margin="10dp"
+        android:orientation="vertical"
+        android:weightSum="6">
 
         <ImageView
             android:id="@+id/imageFoodList"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="4"
             android:scaleType="centerCrop"
             android:src="@drawable/my_bg" />
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:background="#4f0e0d0e"
             android:weightSum="10">
 
             <TextView
                 android:id="@+id/txtNameFoodList"
-                android:layout_weight="9"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
+                android:layout_weight="8"
                 android:text="Name Foods"
-                android:textColor="@android:color/white"
+                android:textColor="@android:color/black"
                 android:textSize="20sp" />
 
             <ImageView
-                android:id="@+id/imageFavorite"
-                android:layout_weight="1"
+                android:id="@+id/imageShare"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:tint="@android:color/white"
-                android:src="@drawable/ic_favorite_border_black" />
+                android:layout_weight="1"
+                android:src="@drawable/ic_share_black_24dp"
+                android:tint="@color/colorPrimary" />
+
+            <ImageView
+                android:id="@+id/imageFavorite"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:src="@drawable/ic_favorite_border_black"
+                android:tint="@color/colorPrimary" />
 
         </LinearLayout>
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
 
+            <TextView
+                android:id="@+id/txtPriceFoodList"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:text="$ 1000"
+                android:textColor="@android:color/black"
+                android:textSize="20sp" />
 
-    </RelativeLayout>
+            <ImageView
+                android:id="@+id/imageCartFoodList"
+                android:layout_width="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentBottom="true"
+                android:layout_marginRight="30dp"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_cart"
+                android:tint="@color/colorPrimary" />
+        </RelativeLayout>
+
+    </LinearLayout>
 
 </androidx.cardview.widget.CardView>

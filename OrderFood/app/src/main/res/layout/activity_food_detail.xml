@@ -45,21 +45,20 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fabFoodDetail"
+    <com.andremion.counterfab.CounterFab
+        android:id="@+id/fabCartFoodDetail"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@android:color/white"
         android:backgroundTint="@android:color/white"
+        android:tint="@color/colorPrimary"
         android:src="@drawable/ic_cart"
         app:backgroundTint="#FFFFFF"
         app:elevation="6dp"
         app:layout_anchor="@id/app_bar_layout"
         app:layout_anchorGravity="bottom|right|end"
         app:pressedTranslationZ="12dp"
-        app:useCompatPadding="true">
-
-    </com.google.android.material.floatingactionbutton.FloatingActionButton>
+        app:useCompatPadding="true"/>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabFoodDetailRating"
@@ -73,9 +72,7 @@
         app:layout_anchor="@id/app_bar_layout"
         app:layout_anchorGravity="bottom|left|start"
         app:pressedTranslationZ="12dp"
-        app:useCompatPadding="true">
-
-    </com.google.android.material.floatingactionbutton.FloatingActionButton>
+        app:useCompatPadding="true"/>
 
     <androidx.core.widget.NestedScrollView
         android:clipToPadding="false"
@@ -142,9 +139,7 @@
                         app:textSize="8sp"
                         app:backGroundColor="@color/colorAccent_BG"
                         app:initialNumber="1"
-                        app:finalNumber="10">
-
-                    </com.cepheuen.elegantnumberbutton.view.ElegantNumberButton>
+                        app:finalNumber="10"/>
 
                 </LinearLayout>
 

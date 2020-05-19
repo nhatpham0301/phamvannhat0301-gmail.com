@@ -42,12 +42,15 @@
                 android:textStyle="bold" />
 
         </LinearLayout>
-        <ImageView
-            android:id="@+id/imageCartItemCount"
-            android:layout_gravity="center_vertical|end"
-            android:layout_marginRight="16dp"
-            android:layout_width="20dp"
-            android:layout_height="20dp"/>
+        <com.cepheuen.elegantnumberbutton.view.ElegantNumberButton
+            android:id="@+id/numberButtonFoodQuantityCart"
+            android:layout_width="60dp"
+            android:layout_height="30dp"
+            android:layout_margin="10dp"
+            app:textSize="8sp"
+            app:backGroundColor="@color/colorAccent_BG"
+            app:initialNumber="1"
+            app:finalNumber="10"/>
     </LinearLayout>
 
 </androidx.cardview.widget.CardView>

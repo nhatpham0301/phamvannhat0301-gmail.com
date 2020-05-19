@@ -1,7 +1,9 @@
 package com.example.orderfood.Activity;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -13,12 +15,14 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.bumptech.glide.Glide;
 import com.example.orderfood.Common.Common;
 import com.example.orderfood.Database.Database;
 import com.example.orderfood.Interface.ItemClickListener;
 import com.example.orderfood.Model.Foods;
+import com.example.orderfood.Model.Order;
 import com.example.orderfood.R;
 import com.example.orderfood.ViewHolder.FoodViewHolder;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
@@ -33,7 +37,10 @@ import com.mancj.materialsearchbar.MaterialSearchBar;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FoodList extends AppCompatActivity {
+import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
+import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
+
+public class FoodList extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener{
 
     RecyclerView recyclerView;
     RecyclerView.LayoutManager layoutManager;
@@ -49,10 +56,22 @@ public class FoodList extends AppCompatActivity {
     FirebaseRecyclerAdapter<Foods, FoodViewHolder> searchAdapter;
     List<String> suggestList;
     MaterialSearchBar materialSearchBar;
+    SwipeRefreshLayout srlLayout;
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //Add font
+        CalligraphyConfig.initDefault(new CalligraphyConfig.Builder()
+                .setDefaultFontPath("fonts/cf.otf")
+                .setFontAttrId(R.attr.fontPath)
+                .build());
+
         setContentView(R.layout.activity_food_list);
 
         addControl();
@@ -69,6 +88,7 @@ public class FoodList extends AppCompatActivity {
             @Override
             protected void onBindViewHolder(final FoodViewHolder viewHolder, final int i, final Foods model) {
                 viewHolder.txtFood.setText(model.getName());
+                viewHolder.txtPrice.setText(String.format("$ %s",model.getPrice()));
                 Glide.with(getApplicationContext())
                         .load(model.getImage())
                         .placeholder(R.drawable.my_bg)
@@ -101,6 +121,27 @@ public class FoodList extends AppCompatActivity {
                     }
                 });
 
+                viewHolder.imageShare.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Toast.makeText(FoodList.this, "Share", Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+                viewHolder.imageCart.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        new Database(getApplicationContext()).addToCart(new Order(
+                                adapter.getRef(i).getKey(),
+                                model.getName(),
+                               "1",
+                                model.getPrice(),
+                                model.getDiscount()
+                        ));
+                        Toast.makeText(FoodList.this, "Added to cart", Toast.LENGTH_SHORT).show();
+                    }
+                });
+
             }
 
             @NonNull
@@ -118,7 +159,6 @@ public class FoodList extends AppCompatActivity {
     }
 
     private void addControl() {
-
         recyclerView = findViewById(R.id.recycler_food);
         recyclerView.setHasFixedSize(true);
         layoutManager = new LinearLayoutManager(this);
@@ -182,20 +222,24 @@ public class FoodList extends AppCompatActivity {
 
             @Override
             public void onButtonClicked(int buttonCode) {
-
             }
         });
+        srlLayout = findViewById(R.id.srlLayoutFoodList);
+        srlLayout.setColorSchemeColors(getResources().getColor(R.color.colorGreen), getResources().getColor(R.color.colorBlue));
+        srlLayout.setOnRefreshListener(this);
     }
 
     private void startSearch(CharSequence text) {
+        Toast.makeText(this, ""+text, Toast.LENGTH_SHORT).show();
         FirebaseRecyclerOptions<Foods> options =
                         new FirebaseRecyclerOptions.Builder<Foods>()
                         .setQuery(reference.orderByChild("name").equalTo(text.toString()), Foods.class)
                         .build();
         searchAdapter = new FirebaseRecyclerAdapter<Foods, FoodViewHolder>(options) {
             @Override
-            protected void onBindViewHolder(FoodViewHolder viewHolder, final int i, Foods model) {
+            protected void onBindViewHolder(final FoodViewHolder viewHolder, final int i,final Foods model) {
                 viewHolder.txtFood.setText(model.getName());
+                viewHolder.txtPrice.setText(String.format("$ %s",model.getPrice()));
                 Glide.with(getApplicationContext())
                         .load(model.getImage())
                         .placeholder(R.drawable.my_bg)
@@ -208,9 +252,33 @@ public class FoodList extends AppCompatActivity {
                         startActivity(intent);
                     }
                 });
+                //add Favorite
+                if(dbLocal.isFavorite(adapter.getRef(i).getKey()))
+                    viewHolder.imageFavorite.setImageResource(R.drawable.ic_favorite_black);
+
+                viewHolder.imageFavorite.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if(!dbLocal.isFavorite(adapter.getRef(i).getKey())){
+                            dbLocal.addToFavorite(adapter.getRef(i).getKey());
+                            viewHolder.imageFavorite.setImageResource(R.drawable.ic_favorite_black);
+                            Toast.makeText(FoodList.this, ""+ model.getName() + "was added to Favorites", Toast.LENGTH_SHORT).show();
+                        } else {
+                            dbLocal.removeFromFavorites(adapter.getRef(i).getKey());
+                            viewHolder.imageFavorite.setImageResource(R.drawable.ic_favorite_border_black);
+                            Toast.makeText(FoodList.this, "" + model.getName() + "was removed from Favorites", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+
+                viewHolder.imageShare.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Toast.makeText(FoodList.this, "Share", Toast.LENGTH_SHORT).show();
+                    }
+                });
 
             }
-
             @NonNull
             @Override
             public FoodViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -242,4 +310,22 @@ public class FoodList extends AppCompatActivity {
                     }
                 });
     }
+
+    @Override
+    public void onRefresh() {
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                loadFood(CategoryId);
+                srlLayout.setRefreshing(false);
+            }
+        }, 1500);
+    }
+
+//    @Override
+//    protected void onStop() {
+//        super.onStop();
+//        adapter.stopListening();
+//        searchAdapter.stopListening();
+//    }
 }

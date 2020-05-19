@@ -8,12 +8,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.amulyakhare.textdrawable.TextDrawable;
+import com.cepheuen.elegantnumberbutton.view.ElegantNumberButton;
 import com.example.orderfood.Common.Common;
+import com.example.orderfood.Database.Database;
 import com.example.orderfood.Interface.ItemClickListener;
 import com.example.orderfood.Model.Order;
 import com.example.orderfood.R;
@@ -27,7 +30,7 @@ class CartViewHolder extends RecyclerView.ViewHolder implements View.OnClickList
             View.OnCreateContextMenuListener{
 
     public TextView txtPrice, txtCartName;
-    public ImageView imageCount;
+    public ElegantNumberButton btnQuantity;
     private ItemClickListener itemClickListener;
 
     public void setItemClickListener(ItemClickListener itemClickListener) {
@@ -39,7 +42,7 @@ class CartViewHolder extends RecyclerView.ViewHolder implements View.OnClickList
 
         txtPrice = itemView.findViewById(R.id.txtCartItemPrice);
         txtCartName = itemView.findViewById(R.id.txtCartItemPrice);
-        imageCount = itemView.findViewById(R.id.imageCartItemCount);
+        btnQuantity = itemView.findViewById(R.id.numberButtonFoodQuantityCart);
 
         itemView.setOnCreateContextMenuListener(this);
 
@@ -75,11 +78,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartViewHolder> {
     }
 
     @Override
-    public void onBindViewHolder(@NonNull CartViewHolder holder, int position) {
-        TextDrawable drawable = TextDrawable.builder()
-                .buildRound(""+listOrder.get(position).getQuantity(), Color.RED);
-        holder.imageCount.setImageDrawable(drawable);
-
+    public void onBindViewHolder(@NonNull CartViewHolder holder, final int position) {
         Locale locale = new Locale("en", "US");
         NumberFormat fmt = NumberFormat.getCurrencyInstance(locale);
         int itemPrice = Integer.parseInt(listOrder.get(position).getPrice());
@@ -87,6 +86,14 @@ public class CartAdapter extends RecyclerView.Adapter<CartViewHolder> {
         int price = itemPrice * itemQuantity;
         holder.txtPrice.setText(fmt.format(price));
         holder.txtCartName.setText(listOrder.get(position).getProductName());
+        holder.btnQuantity.setOnValueChangeListener(new ElegantNumberButton.OnValueChangeListener() {
+            @Override
+            public void onValueChange(ElegantNumberButton view, int oldValue, int newValue) {
+                Order order1 = listOrder.get(position);
+                order1.setQuantity(String.valueOf(newValue));
+                new Database(context).updateCart(order1);
+            }
+        });
 
     }
 

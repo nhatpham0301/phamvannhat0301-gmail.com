@@ -1,5 +1,6 @@
 package com.example.orderfood.Activity;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
@@ -10,6 +11,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.andremion.counterfab.CounterFab;
 import com.bumptech.glide.Glide;
 import com.cepheuen.elegantnumberbutton.view.ElegantNumberButton;
 import com.example.orderfood.Common.Common;
@@ -31,12 +33,16 @@ import com.stepstone.apprating.listener.RatingDialogListener;
 
 import java.util.Arrays;
 
+import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
+import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
+
 public class FoodDetail extends AppCompatActivity implements RatingDialogListener {
 
     TextView txtFoodName, txtFoodPrice, txtFoodDescription;
     ImageView imageFood;
     CollapsingToolbarLayout collapsingToolbarLayout;
-    FloatingActionButton fabCart, fabRating;
+    FloatingActionButton fabRating;
+    CounterFab fabCart;
     ElegantNumberButton btnNumber;
     RatingBar ratingBar;
 
@@ -47,9 +53,21 @@ public class FoodDetail extends AppCompatActivity implements RatingDialogListene
     DatabaseReference ratingDB;
 
     Foods currentFood;
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //Add font
+        CalligraphyConfig.initDefault(new CalligraphyConfig.Builder()
+                .setDefaultFontPath("fonts/cf.otf")
+                .setFontAttrId(R.attr.fontPath)
+                .build());
+
         setContentView(R.layout.activity_food_detail);
 
         addControl();
@@ -80,6 +98,8 @@ public class FoodDetail extends AppCompatActivity implements RatingDialogListene
                 Toast.makeText(FoodDetail.this, "Added to cart", Toast.LENGTH_SHORT).show();
             }
         });
+
+        fabCart.setCount(new Database(this).getCountCart());
 
         fabRating.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -113,7 +133,7 @@ public class FoodDetail extends AppCompatActivity implements RatingDialogListene
         txtFoodPrice = findViewById(R.id.txtPriceFoodDetail);
         txtFoodDescription = findViewById(R.id.txtDescription);
         imageFood = findViewById(R.id.imageFoodDetail);
-        fabCart = findViewById(R.id.fabFoodDetail);
+        fabCart = findViewById(R.id.fabCartFoodDetail);
         btnNumber = findViewById(R.id.numberButtonFoodDetail);
         fabRating = findViewById(R.id.fabFoodDetailRating);
         ratingBar = findViewById(R.id.ratingBar);

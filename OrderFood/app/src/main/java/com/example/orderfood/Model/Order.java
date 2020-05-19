@@ -1,7 +1,7 @@
 package com.example.orderfood.Model;
 
 public class Order {
-    private String ProductId, ProductName, Quantity, Price, Discount;
+    private String ID,ProductId, ProductName, Quantity, Price, Discount;
 
     public Order() {}
 
@@ -11,6 +11,23 @@ public class Order {
         Quantity = quantity;
         Price = price;
         Discount = discount;
+    }
+
+    public Order(String ID, String productId, String productName, String quantity, String price, String discount) {
+        this.ID = ID;
+        ProductId = productId;
+        ProductName = productName;
+        Quantity = quantity;
+        Price = price;
+        Discount = discount;
+    }
+
+    public String getID() {
+        return ID;
+    }
+
+    public void setID(String ID) {
+        this.ID = ID;
     }
 
     public String getProductId() {

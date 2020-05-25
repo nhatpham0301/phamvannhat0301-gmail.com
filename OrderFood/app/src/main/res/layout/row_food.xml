@@ -27,13 +27,21 @@
 
             <TextView
                 android:id="@+id/txtNameFoodList"
-                android:layout_weight="9"
+                android:layout_weight="8"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
                 android:text="Name Foods"
                 android:textColor="@android:color/white"
                 android:textSize="20sp" />
+
+            <ImageView
+                android:id="@+id/imageShare"
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:tint="@android:color/white"
+                android:src="@drawable/ic_share_black_24dp" />
 
             <ImageView
                 android:id="@+id/imageFavorite"

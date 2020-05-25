@@ -1,6 +1,8 @@
 package com.example.orderfood.Activity;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -21,6 +23,10 @@ import com.example.orderfood.Interface.ItemClickListener;
 import com.example.orderfood.Model.Foods;
 import com.example.orderfood.R;
 import com.example.orderfood.ViewHolder.FoodViewHolder;
+import com.facebook.CallbackManager;
+import com.facebook.share.model.SharePhoto;
+import com.facebook.share.model.SharePhotoContent;
+import com.facebook.share.widget.ShareDialog;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.firebase.database.DataSnapshot;
@@ -29,6 +35,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.mancj.materialsearchbar.MaterialSearchBar;
+import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,10 +58,46 @@ public class FoodList extends AppCompatActivity {
     List<String> suggestList;
     MaterialSearchBar materialSearchBar;
 
+    // Facebook share
+    CallbackManager callbackManager;
+    ShareDialog shareDialog;
+
+    // Create target from picasso
+    Target target = new Target() {
+        @Override
+        public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+
+            SharePhoto sharePhoto = new SharePhoto.Builder()
+                    .setBitmap(bitmap)
+                    .build();
+            if (ShareDialog.canShow(SharePhotoContent.class)){
+
+                SharePhotoContent content = new SharePhotoContent.Builder()
+                        .addPhoto(sharePhoto)
+                        .build();
+                shareDialog.show(content);
+            }
+        }
+
+        @Override
+        public void onBitmapFailed(Exception e, Drawable errorDrawable) {
+
+        }
+
+        @Override
+        public void onPrepareLoad(Drawable placeHolderDrawable) {
+
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_food_list);
+
+        // Init facebook
+        callbackManager = CallbackManager.Factory.create();
+        shareDialog = new ShareDialog(this);
 
         addControl();
         addEvent();
@@ -98,6 +142,15 @@ public class FoodList extends AppCompatActivity {
                             viewHolder.imageFavorite.setImageResource(R.drawable.ic_favorite_border_black);
                             Toast.makeText(FoodList.this, "" + model.getName() + "was removed from Favorites", Toast.LENGTH_SHORT).show();
                         }
+                    }
+                });
+
+                // Click to share
+                viewHolder.imageShare.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
+                        Picasso.get().load(model.getImage()).into(target);
                     }
                 });
 

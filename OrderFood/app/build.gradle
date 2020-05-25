@@ -48,6 +48,11 @@ dependencies {
     implementation 'com.github.mancj:MaterialSearchBar:0.7.1'
 
     //paper db and material
+    implementation 'com.paypal.sdk:paypal-android-sdk:2.16.0'
+    implementation 'com.squareup.picasso:picasso:2.71828'
+    implementation 'com.facebook.android:facebook-android-sdk:5.0.0'
+    implementation 'com.facebook.android:facebook-share:5.0.0'
+    implementation 'com.github.d-max:spots-dialog:1.1@aar'
     implementation 'io.paperdb:paperdb:2.1'
     implementation 'com.github.rey5137:material:1.2.4'
     implementation 'com.stepstone.apprating:app-rating:2.0.0'

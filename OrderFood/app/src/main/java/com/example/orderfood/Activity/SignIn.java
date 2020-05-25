@@ -73,7 +73,7 @@ public class SignIn extends AppCompatActivity {
     }
 
     private void signIn() {
-        reference.addValueEventListener(new ValueEventListener() {
+        reference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 
@@ -89,6 +89,9 @@ public class SignIn extends AppCompatActivity {
                             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                             startActivity(intent);
                             finish();
+
+                            reference.removeEventListener(this);
+
                             Toast.makeText(SignIn.this, "Successfully", Toast.LENGTH_SHORT).show();
                         } else {
                             progress.dismiss();

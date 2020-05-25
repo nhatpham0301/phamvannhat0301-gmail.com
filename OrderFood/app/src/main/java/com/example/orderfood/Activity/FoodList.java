@@ -2,6 +2,8 @@ package com.example.orderfood.Activity;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
@@ -25,6 +27,10 @@ import com.example.orderfood.Model.Foods;
 import com.example.orderfood.Model.Order;
 import com.example.orderfood.R;
 import com.example.orderfood.ViewHolder.FoodViewHolder;
+import com.facebook.CallbackManager;
+import com.facebook.share.model.SharePhoto;
+import com.facebook.share.model.SharePhotoContent;
+import com.facebook.share.widget.ShareDialog;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.firebase.database.DataSnapshot;
@@ -33,6 +39,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.mancj.materialsearchbar.MaterialSearchBar;
+import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,6 +66,38 @@ public class FoodList extends AppCompatActivity implements SwipeRefreshLayout.On
     MaterialSearchBar materialSearchBar;
     SwipeRefreshLayout srlLayout;
 
+    // Facebook share
+    CallbackManager callbackManager;
+    ShareDialog shareDialog;
+
+    // Create target from picasso
+    Target target = new Target() {
+        @Override
+        public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+
+            SharePhoto sharePhoto = new SharePhoto.Builder()
+                    .setBitmap(bitmap)
+                    .build();
+            if (ShareDialog.canShow(SharePhotoContent.class)){
+
+                SharePhotoContent content = new SharePhotoContent.Builder()
+                        .addPhoto(sharePhoto)
+                        .build();
+                shareDialog.show(content);
+            }
+        }
+
+        @Override
+        public void onBitmapFailed(Exception e, Drawable errorDrawable) {
+
+        }
+
+        @Override
+        public void onPrepareLoad(Drawable placeHolderDrawable) {
+
+        }
+    };
+
     @Override
     protected void attachBaseContext(Context newBase) {
         super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
@@ -73,6 +113,10 @@ public class FoodList extends AppCompatActivity implements SwipeRefreshLayout.On
                 .build());
 
         setContentView(R.layout.activity_food_list);
+
+        // Init facebook
+        callbackManager = CallbackManager.Factory.create();
+        shareDialog = new ShareDialog(this);
 
         addControl();
         addEvent();
@@ -121,10 +165,11 @@ public class FoodList extends AppCompatActivity implements SwipeRefreshLayout.On
                     }
                 });
 
+                // click to share
                 viewHolder.imageShare.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        Toast.makeText(FoodList.this, "Share", Toast.LENGTH_SHORT).show();
+                        Picasso.get().load(model.getImage()).into(target);
                     }
                 });
 
@@ -271,10 +316,11 @@ public class FoodList extends AppCompatActivity implements SwipeRefreshLayout.On
                     }
                 });
 
+                // click to share
                 viewHolder.imageShare.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        Toast.makeText(FoodList.this, "Share", Toast.LENGTH_SHORT).show();
+                        Picasso.get().load(model.getImage()).into(target);
                     }
                 });
 

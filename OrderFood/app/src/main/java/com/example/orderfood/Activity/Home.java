@@ -2,6 +2,7 @@ package com.example.orderfood.Activity;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -11,13 +12,13 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.LayoutAnimationController;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
@@ -38,12 +39,18 @@ import com.example.orderfood.R;
 import com.example.orderfood.ViewHolder.MenuViewHolder;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.iid.FirebaseInstanceId;
+import com.rengwuxian.materialedittext.MaterialEditText;
 
+import java.util.HashMap;
+
+import dmax.dialog.SpotsDialog;
 import io.paperdb.Paper;
 import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
@@ -234,6 +241,9 @@ public class Home extends AppCompatActivity implements
                startActivity(new Intent(getApplicationContext(), OrderStatus.class));
                Toast.makeText(this, "order", Toast.LENGTH_SHORT).show();
                break;
+           case R.id.nav_change_password:
+               showDialogChangePassword();
+               break;
            case R.id.nav_logout:
 
                // delete user
@@ -250,6 +260,70 @@ public class Home extends AppCompatActivity implements
        }
         drawer.closeDrawer(GravityCompat.START);
         return false;
+    }
+
+    private void showDialogChangePassword() {
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(Home.this);
+        alertDialog.setTitle(R.string.change_password);
+        alertDialog.setMessage(R.string.please_fill_all_information);
+
+        LayoutInflater layoutInflater = LayoutInflater.from(this);
+        View viewDialog = layoutInflater.inflate(R.layout.row_change_password, null);
+
+        final MaterialEditText edtPassword = viewDialog.findViewById(R.id.edtPassword);
+        final MaterialEditText edtNewPassword = viewDialog.findViewById(R.id.edtNewPassword);
+        final MaterialEditText edtRepeatPassword = viewDialog.findViewById(R.id.edtRepeatPassword);
+
+        alertDialog.setView(viewDialog);
+        alertDialog.setPositiveButton(R.string.change, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+                final android.app.AlertDialog waitingDialog = new SpotsDialog.Builder().setContext(Home.this).build();
+                waitingDialog.show();
+
+                if (edtPassword.getText().toString().equals(Common.currentUser.getPassword())){
+                    if (edtNewPassword.getText().toString().equals(edtRepeatPassword.getText().toString())){
+                        HashMap<String, Object> updatePassword = new HashMap<>();
+                        updatePassword.put(getString(R.string.firebase_password), edtNewPassword.getText().toString());
+                        DatabaseReference reference = FirebaseDatabase.getInstance().getReference(getString(R.string.firebase_Users));
+                        reference.child(Common.currentUser.getPhone())
+                                .updateChildren(updatePassword)
+                                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+
+                                        waitingDialog.dismiss();
+                                        Toast.makeText(Home.this, R.string.Password_was_update, Toast.LENGTH_SHORT).show();
+                                    }
+                                })
+                                .addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+
+                                        waitingDialog.dismiss();
+                                        Toast.makeText(Home.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                    }else {
+                        waitingDialog.dismiss();
+                        Toast.makeText(Home.this, R.string.new_password_does_not_math, Toast.LENGTH_SHORT).show();
+                    }
+                }else {
+                    waitingDialog.dismiss();
+                    Toast.makeText(Home.this, R.string.wrong_old_password, Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+        alertDialog.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+
+        alertDialog.show();
     }
 
     @Override

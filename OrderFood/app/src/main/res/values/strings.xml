@@ -15,4 +15,24 @@
     <string name="menu_tools">Tools</string>
     <string name="menu_share">Share</string>
     <string name="menu_send">Send</string>
+
+    <string name="password">Password</string>
+    <string name="repeat_password">Repeat Password</string>
+    <string name="new_password">New Password</string>
+    <string name="change_password">Change password</string>
+    <string name="please_fill_all_information">Please fill all information</string>
+    <string name="change">Change</string>
+    <string name="cancel">Cancel</string>
+    <string name="wrong_old_password">Wrong old password</string>
+    <string name="new_password_does_not_math">New password does\'t math</string>
+    <string name="firebase_password">password</string>
+    <string name="firebase_Users">Users</string>
+    <string name="Password_was_update">Password was update</string>
+    <string name="facebook_app_id">249939549604905</string>
+    <string name="facebook_login_protocol_name">fb249939549604905</string>
+    <string name="paypal_client_id">Ab9qQJxZLbIcc7QqF2zyV4Q2NV2g5fcUdfHkse2680tTBPXlERdDUZixzboqOq7GpiMbk6qRRRfEa154</string>
+    <string name="Comment">Comment</string>
+    <string name="Address">Address</string>
+    <string name="USD">USD</string>
+    <string name="App_Order_Food">App Order Food</string>
 </resources>

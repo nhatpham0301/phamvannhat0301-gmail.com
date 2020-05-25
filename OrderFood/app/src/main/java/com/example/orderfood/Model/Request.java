@@ -3,20 +3,21 @@ package com.example.orderfood.Model;
 import java.util.List;
 
 public class Request {
-    private String Phone, Name, Address, Total, Status, Comment;
+    private String Phone, Name, Address, Total, Status, Comment, paymentState;
     private Double Latitude,Longitude;
     private List<Order> Foods;
 
     public Request() {
     }
 
-    public Request(String phone, String name, String address, String total, String status, String comment, Double latitude, Double longitude, List<Order> foods) {
+    public Request(String phone, String name, String address, String total, String status, String comment, String paymentState, Double latitude, Double longitude, List<Order> foods) {
         Phone = phone;
         Name = name;
         Address = address;
         Total = total;
         Status = status;
         Comment = comment;
+        this.paymentState = paymentState;
         Latitude = latitude;
         Longitude = longitude;
         Foods = foods;
@@ -60,6 +61,14 @@ public class Request {
 
     public void setStatus(String status) {
         Status = status;
+    }
+
+    public String getPaymentState() {
+        return paymentState;
+    }
+
+    public void setPaymentState(String paymentState) {
+        this.paymentState = paymentState;
     }
 
     public String getComment() {

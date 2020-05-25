@@ -1,7 +1,8 @@
 package com.example.orderfood.Model;
 
 public class Order {
-    private String ID,ProductId, ProductName, Quantity, Price, Discount;
+    private int ID;
+    private String ProductId, ProductName, Quantity, Price, Discount;
 
     public Order() {}
 
@@ -13,7 +14,7 @@ public class Order {
         Discount = discount;
     }
 
-    public Order(String ID, String productId, String productName, String quantity, String price, String discount) {
+    public Order(int ID, String productId, String productName, String quantity, String price, String discount) {
         this.ID = ID;
         ProductId = productId;
         ProductName = productName;
@@ -22,11 +23,11 @@ public class Order {
         Discount = discount;
     }
 
-    public String getID() {
+    public int getID() {
         return ID;
     }
 
-    public void setID(String ID) {
+    public void setID(int ID) {
         this.ID = ID;
     }
 
